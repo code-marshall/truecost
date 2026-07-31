@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home: Rent vs Buy — TrueCost</title>
+<style>
+:root{
+  --mono: ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
+  --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif: "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --paper:#E6E8E3;
+  --card:#F6F7F4;
+  --ink:#10241F;
+  --muted:#6A7570;
+  --rule:#C6CBC2;
+  --buy:#1D5C4F;
+  --rent:#9B3B5E;
+  --gold:#B07D22;
+  --nav-bg:#10241F;
+  --shadow:0 1px 0 #fff inset, 0 2px 12px rgba(16,36,31,.07);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:15px;line-height:1.5;
+  -webkit-text-size-adjust:100%;
+}
+
+/* ---------- top nav ---------- */
+.topnav{
+  background:var(--nav-bg);
+  padding:12px 20px;
+  display:flex;align-items:center;gap:10px;
+}
+.topnav a{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:#9FB4BD;text-decoration:none;
+  display:flex;align-items:center;gap:5px;transition:color .15s;
+}
+.topnav a:hover{color:#fff}
+.topnav .sep{color:#2E4A54;font-size:14px}
+.topnav .current{
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--gold);
+}
+
+.wrap{max-width:1020px;margin:0 auto;padding:22px 16px 64px}
+
+/* ---------- masthead ---------- */
+header{border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:22px}
+.eyebrow{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap
+}
+h1{
+  font-family:var(--serif);font-weight:400;
+  font-size:clamp(34px,8vw,58px);line-height:1;margin:10px 0 6px;letter-spacing:-.01em
+}
+h1 em{font-style:italic;color:var(--buy)}
+.sub{color:var(--muted);max-width:52ch;font-size:14px;margin:0}
+
+/* ---------- layout ---------- */
+.grid{display:grid;gap:20px;grid-template-columns:1fr}
+@media(min-width:900px){.grid{grid-template-columns:minmax(0,380px) minmax(0,1fr);align-items:start}
+  .col-in{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow-y:auto;padding-right:6px}}
+
+/* ---------- inputs ---------- */
+fieldset{border:1px solid var(--rule);border-radius:3px;background:var(--card);
+  padding:12px 14px 14px;margin:0 0 12px;box-shadow:var(--shadow)}
+legend{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  padding:0 7px;color:var(--ink);background:var(--card);border:1px solid var(--rule);border-radius:2px
+}
+.row{display:flex;align-items:baseline;gap:10px;padding:6px 0;border-bottom:1px dotted var(--rule)}
+.row:last-child{border-bottom:0}
+.row label{flex:1;font-size:13.5px;color:var(--ink)}
+.row label small{display:block;color:var(--muted);font-size:11px;line-height:1.3}
+.f{position:relative;flex:0 0 118px}
+.f input,.f select{
+  width:100%;font-family:var(--mono);font-size:14px;font-weight:500;
+  text-align:right;padding:6px 8px 6px 20px;border:1px solid var(--rule);border-radius:2px;
+  background:#fff;color:var(--ink)
+}
+.f select{padding-left:8px;text-align:left;font-size:12.5px}
+.f.pc input{padding-left:8px;padding-right:24px;text-align:right}
+.f .unit{position:absolute;top:50%;transform:translateY(-50%);font-family:var(--mono);
+  font-size:12px;color:var(--muted);pointer-events:none}
+.f .unit.l{left:7px}.f .unit.r{right:7px}
+input:focus,select:focus{outline:2px solid var(--gold);outline-offset:1px}
+.chk{display:flex;gap:8px;align-items:flex-start;padding:7px 0;font-size:13px}
+.chk input{margin-top:3px;accent-color:var(--buy)}
+.hint{font-size:11.5px;color:var(--muted);font-family:var(--mono);margin-top:8px}
+
+/* ---------- verdict ---------- */
+.verdict{border:2px solid var(--ink);border-radius:3px;background:var(--card);padding:18px 18px 16px;
+  position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.verdict .kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--muted)}
+.verdict h2{font-family:var(--serif);font-weight:400;font-size:clamp(26px,6.4vw,40px);
+  line-height:1.05;margin:6px 0 8px;max-width:19ch}
+.verdict p{margin:0;font-size:14px;max-width:48ch;color:#2b3a34}
+.seal{position:absolute;right:-14px;top:50%;transform:translateY(-50%) rotate(-11deg);
+  width:132px;height:132px;border:2px solid var(--gold);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;opacity:.9}
+.seal:after{content:"";position:absolute;inset:6px;border:1px solid var(--gold);border-radius:50%}
+.seal .in{text-align:center;font-family:var(--mono);color:var(--gold);line-height:1.15}
+.seal .in b{display:block;font-size:30px;font-weight:600}
+.seal .in span{font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;display:block}
+@media(max-width:600px){.seal{position:static;transform:rotate(-4deg);margin:14px auto 0;width:112px;height:112px}}
+
+/* ---------- panels ---------- */
+.panel{border:1px solid var(--rule);border-radius:3px;background:var(--card);padding:14px;margin-top:14px;
+  box-shadow:var(--shadow)}
+.panel h3{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 10px;font-weight:500}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{border:1px solid var(--rule);border-radius:2px;padding:10px;background:#fff}
+.stat .l{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stat .v{font-family:var(--mono);font-size:19px;font-weight:600;margin-top:3px;letter-spacing:-.02em}
+.stat.b{border-left:3px solid var(--buy)} .stat.b .v{color:var(--buy)}
+.stat.r{border-left:3px solid var(--rent)} .stat.r .v{color:var(--rent)}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:6px 4px;text-align:right;border-bottom:1px dotted var(--rule)}
+th:first-child,td:first-child{text-align:left}
+th{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);font-weight:500;border-bottom:1px solid var(--ink)}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums}
+tr.tot td{border-top:1px solid var(--ink);border-bottom:0;font-weight:600}
+.ok{color:var(--buy);font-weight:600}.no{color:var(--rent)}
+
+/* ---------- calculate button ---------- */
+.calc{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:15px 16px;margin-top:4px;cursor:pointer;
+  background:var(--ink);color:var(--card);border:0;border-radius:3px;
+  font-family:var(--mono);font-size:13px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;
+  box-shadow:0 2px 10px rgba(16,36,31,.18);transition:background .15s,transform .1s
+}
+.calc:hover{background:var(--buy)}
+.calc:active{transform:translateY(1px)}
+.calc:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.calc svg{width:16px;height:16px;flex:0 0 16px}
+.back{
+  display:none;width:100%;margin-top:14px;padding:12px;cursor:pointer;
+  background:transparent;color:var(--muted);border:1px solid var(--rule);border-radius:3px;
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase
+}
+.back:hover{color:var(--ink);border-color:var(--ink)}
+@media(max-width:899px){.back{display:block}}
+@media(min-width:900px){.calc{display:none}}
+:target{scroll-margin-top:12px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+svg{display:block;width:100%;height:auto}
+.legend{display:flex;gap:16px;font-family:var(--mono);font-size:11px;margin-bottom:6px;flex-wrap:wrap}
+.legend i{display:inline-block;width:14px;height:3px;vertical-align:middle;margin-right:5px}
+footer{margin-top:26px;padding-top:12px;border-top:1px solid var(--rule);
+  font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.6}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <a href="index.html">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    TrueCost
+  </a>
+  <span class="sep">/</span>
+  <span class="current">Home · Rent vs Buy</span>
+</nav>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow"><span>Rent vs Buy · India</span><span>Stamp duty · Rent escalation · Opportunity cost</span></div>
+  <h1>Should you buy, or <em>keep renting?</em></h1>
+  <p class="sub">Every number below is yours to change. The verdict compares net worth in both worlds — property equity after selling costs versus a renter's invested corpus.</p>
+</header>
+
+<div class="grid">
+  <!-- ================= INPUTS ================= -->
+  <div class="col-in">
+
+    <fieldset>
+      <legend>The property</legend>
+      <div class="row"><label>Property price</label>
+        <div class="f"><span class="unit l">₹</span><input id="price" type="number" inputmode="numeric" value="8000000"></div></div>
+      <div class="row"><label>Down payment</label>
+        <div class="f pc"><input id="dp" type="number" value="20"><span class="unit r">%</span></div></div>
+      <div class="row"><label>State preset<small>sets stamp duty</small></label>
+        <div class="f"><select id="state">
+          <option value="">Custom</option>
+          <option value="6">Maharashtra / Mumbai — 6%</option>
+          <option value="5">Karnataka / Bengaluru — 5%</option>
+          <option value="6" selected>Delhi (men) — 6%</option>
+          <option value="4">Delhi (women) — 4%</option>
+          <option value="7">Tamil Nadu — 7%</option>
+          <option value="5">Telangana — 5%</option>
+          <option value="7">Uttar Pradesh — 7%</option>
+          <option value="7">Haryana — 7%</option>
+          <option value="6">West Bengal — 6%</option>
+        </select></div></div>
+      <div class="row"><label>Stamp duty</label>
+        <div class="f pc"><input id="stamp" type="number" step="0.5" value="6"><span class="unit r">%</span></div></div>
+      <div class="row"><label>Registration</label>
+        <div class="f pc"><input id="reg" type="number" step="0.1" value="1"><span class="unit r">%</span></div></div>
+      <div class="row"><label>Other one-time<small>legal, GST, brokerage, interiors</small></label>
+        <div class="f"><span class="unit l">₹</span><input id="other" type="number" value="600000"></div></div>
+      <div class="row"><label>Price appreciation<small>per year</small></label>
+        <div class="f pc"><input id="appr" type="number" step="0.25" value="7"><span class="unit r">%</span></div></div>
+      <div class="row"><label>Cost to sell later</label>
+        <div class="f pc"><input id="sellcost" type="number" step="0.5" value="2"><span class="unit r">%</span></div></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>The loan</legend>
+      <div class="row"><label>Interest rate</label>
+        <div class="f pc"><input id="rate" type="number" step="0.05" value="8.5"><span class="unit r">%</span></div></div>
+      <div class="row"><label>Tenure</label>
+        <div class="f pc"><input id="tenure" type="number" value="20"><span class="unit r">yr</span></div></div>
+      <div class="row"><label>Tax regime</label>
+        <div class="f"><select id="regime">
+          <option value="new" selected>New — no deductions</option>
+          <option value="old">Old — 24(b) + 80C</option>
+        </select></div></div>
+      <div class="row"><label>Your tax slab</label>
+        <div class="f pc"><input id="slab" type="number" value="30"><span class="unit r">%</span></div></div>
+      <div class="chk"><input type="checkbox" id="c80" checked><label for="c80">80C already used up by EPF, insurance, ELSS</label></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Owning it</legend>
+      <div class="row"><label>Society maintenance<small>per month</small></label>
+        <div class="f"><span class="unit l">₹</span><input id="maint" type="number" value="4000"></div></div>
+      <div class="row"><label>Property tax + repairs<small>per year, % of value</small></label>
+        <div class="f pc"><input id="ptax" type="number" step="0.1" value="0.6"><span class="unit r">%</span></div></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Renting instead</legend>
+      <div class="row"><label>Rent today<small>per month</small></label>
+        <div class="f"><span class="unit l">₹</span><input id="rent" type="number" value="28000"></div></div>
+      <div class="row"><label>Rent increase<small>per year</small></label>
+        <div class="f pc"><input id="rentgrow" type="number" step="0.5" value="7"><span class="unit r">%</span></div></div>
+      <div class="row"><label>Deposit<small>months of rent, refundable</small></label>
+        <div class="f pc"><input id="deposit" type="number" value="3"><span class="unit r">mo</span></div></div>
+      <div class="row"><label>Broker fee on renewal<small>months of rent</small></label>
+        <div class="f pc"><input id="broker" type="number" step="0.5" value="1"><span class="unit r">mo</span></div></div>
+      <div class="row"><label>You shift every</label>
+        <div class="f pc"><input id="brokerevery" type="number" value="3"><span class="unit r">yr</span></div></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Your money</legend>
+      <div class="row"><label>Investment return<small>on money not sunk into the house</small></label>
+        <div class="f pc"><input id="inv" type="number" step="0.5" value="11"><span class="unit r">%</span></div></div>
+      <div class="row"><label>Take-home pay<small>per month, after tax</small></label>
+        <div class="f"><span class="unit l">₹</span><input id="income" type="number" value="200000"></div></div>
+      <div class="row"><label>You save<small>per month, after rent</small></label>
+        <div class="f"><span class="unit l">₹</span><input id="save" type="number" value="70000"></div></div>
+      <div class="row"><label>Saved so far<small>earmarked for the house</small></label>
+        <div class="f"><span class="unit l">₹</span><input id="corpus" type="number" value="1500000"></div></div>
+      <div class="row"><label>Salary growth<small>per year</small></label>
+        <div class="f pc"><input id="salgrow" type="number" step="0.5" value="8"><span class="unit r">%</span></div></div>
+      <div class="row"><label>Max EMI<small>share of take-home</small></label>
+        <div class="f pc"><input id="emicap" type="number" value="40"><span class="unit r">%</span></div></div>
+      <div class="row"><label>Years you'll stay put</label>
+        <div class="f pc"><input id="stay" type="number" value="10"><span class="unit r">yr</span></div></div>
+      <div class="hint">Inflation on maintenance and other costs is assumed at 5% a year.</div>
+    </fieldset>
+
+    <button type="button" id="calc" class="calc">
+      <span>Show me the verdict</span>
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 4v15M5 13l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="hint" style="text-align:center">Numbers update as you type — this just takes you to the results.</div>
+  </div>
+
+  <!-- ================= OUTPUT ================= -->
+  <div>
+    <div class="verdict" id="results" tabindex="-1">
+      <div class="kicker" id="vk">The verdict</div>
+      <h2 id="vh">—</h2>
+      <p id="vp">—</p>
+      <div class="seal"><div class="in"><span>Break-even</span><b id="seal-y">—</b><span id="seal-l">year</span></div></div>
+    </div>
+
+    <div class="panel">
+      <h3>Net worth, year by year</h3>
+      <div class="legend">
+        <span><i style="background:var(--buy)"></i>If you buy</span>
+        <span><i style="background:var(--rent)"></i>If you rent &amp; invest the difference</span>
+      </div>
+      <svg id="chart" viewBox="0 0 680 330" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Net worth over time"></svg>
+      <div class="hint" id="chartnote"></div>
+    </div>
+
+    <div class="panel">
+      <h3>Month one, side by side</h3>
+      <div class="two">
+        <div class="stat b"><div class="l">Buying costs</div><div class="v" id="s-buy">—</div></div>
+        <div class="stat r"><div class="l">Renting costs</div><div class="v" id="s-rent">—</div></div>
+        <div class="stat b"><div class="l">EMI</div><div class="v" id="s-emi">—</div></div>
+        <div class="stat b"><div class="l">Cash needed upfront</div><div class="v" id="s-up">—</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>What you hand over on day one</h3>
+      <table>
+        <thead><tr><th>Item</th><th>Amount</th><th>Of price</th></tr></thead>
+        <tbody id="upfront-body"></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h3>How long to wait</h3>
+      <p id="wait-verdict" style="margin:0 0 10px;font-size:14px"></p>
+      <table>
+        <thead><tr><th>Buy in</th><th>Price then</th><th>Cash needed</th><th>Your corpus</th><th>EMI vs cap</th><th></th></tr></thead>
+        <tbody id="wait-body"></tbody>
+      </table>
+      <div class="hint">Green means your saved corpus covers the upfront cash and the EMI fits inside your ceiling.</div>
+    </div>
+
+    <div class="panel">
+      <h3>Where you land</h3>
+      <table>
+        <thead><tr><th>At year</th><th>Property value</th><th>Loan left</th><th>Owner net worth</th><th>Renter net worth</th></tr></thead>
+        <tbody id="year-body"></tbody>
+      </table>
+    </div>
+
+    <button type="button" id="back" class="back">↑ Change the numbers</button>
+
+    <footer>
+      This is a model, not advice. Two inputs swing the answer more than all the others: property appreciation and your investment return. Move them a percentage point each way before you trust the verdict. Job stability matters more than any number here — if there's a real chance you move cities in five years, transaction costs alone usually settle it.
+    </footer>
+  </div>
+</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const num = id => { const el=$(id); if(!el) return 0; const v = parseFloat(el.value); return isFinite(v) ? v : 0; };
+const clamp = (v,lo,hi) => Math.min(hi, Math.max(lo, v));
+const INFL = 0.05, HORIZON = 25;
+
+function inr(n){
+  if(!isFinite(n)) return '—';
+  n = Math.round(n);
+  const s = Math.abs(n).toLocaleString('en-IN');
+  return (n<0?'−₹':'₹') + s;
+}
+function compact(n){
+  if(!isFinite(n)) return '—';
+  const a = Math.abs(n), sign = n<0?'−':'';
+  if(a >= 1e7) return sign+'₹'+(a/1e7).toFixed(a/1e7>=10?1:2)+' Cr';
+  if(a >= 1e5) return sign+'₹'+(a/1e5).toFixed(a/1e5>=10?1:2)+' L';
+  if(a >= 1e3) return sign+'₹'+Math.round(a/1e3)+'k';
+  return sign+'₹'+Math.round(a);
+}
+
+function model(){
+  const P=Math.max(0,num('price')), dp=clamp(num('dp'),0,100)/100, stamp=num('stamp')/100, reg=num('reg')/100,
+        other=num('other'), rate=Math.max(0,num('rate'))/100, tenure=clamp(num('tenure'),1,40), appr=num('appr')/100,
+        maint=num('maint'), ptax=num('ptax')/100, sell=num('sellcost')/100,
+        rent0=num('rent'), rg=num('rentgrow')/100, depM=num('deposit'),
+        brkM=num('broker'), brkY=Math.max(1,num('brokerevery')), rInv=num('inv')/100,
+        slab=num('slab')/100, oldRegime=$('regime').value==='old', c80=$('c80').checked;
+
+  const loan = Math.max(0, P*(1-dp));
+  const i = rate/12, n = Math.round(tenure*12);
+  const emi = (loan>0 && i>0 && n>0) ? loan*i*Math.pow(1+i,n)/(Math.pow(1+i,n)-1) : (n>0?loan/n:0);
+  const upfront = P*dp + P*stamp + P*reg + other;
+  const deposit = rent0*depM;
+
+  let bal = loan, buyInv = 0, rentInv = Math.max(0, upfront - deposit);
+  const mInv = rInv/12;
+  const series = [];
+
+  const nw0b = P*(1-sell) - loan;
+  series.push({y:0, val:P, bal:loan, buy:nw0b, rent:rentInv+deposit});
+
+  let yInt=0, yPrin=0, m1buy=0, m1rent=0;
+
+  for(let m=1; m<=HORIZON*12; m++){
+    const yIdx = Math.floor((m-1)/12);
+    const value = P*Math.pow(1+appr, m/12);
+    let intM=0, prinM=0;
+    if(m<=n && bal>0.5){ intM = bal*i; prinM = Math.min(emi-intM, bal); bal -= prinM; }
+    yInt+=intM; yPrin+=prinM;
+
+    const buyOut = (m<=n?emi:0) + maint*Math.pow(1+INFL,yIdx) + value*ptax/12;
+    const rentM = rent0*Math.pow(1+rg,yIdx);
+    const rentOut = rentM + (brkM*rentM)/(brkY*12);
+    if(m===1){ m1buy=buyOut; m1rent=rentOut; }
+
+    buyInv *= (1+mInv); rentInv *= (1+mInv);
+    const d = buyOut - rentOut;
+    if(d>0) rentInv += d; else buyInv += -d;
+
+    if(m%12===0){
+      if(oldRegime){
+        let ben = Math.min(yInt,200000)*slab;
+        if(!c80) ben += Math.min(yPrin,150000)*slab;
+        buyInv += ben;
+      }
+      yInt=0; yPrin=0;
+      series.push({y:m/12, val:value, bal:Math.max(0,bal),
+        buy: value*(1-sell) - Math.max(0,bal) + buyInv,
+        rent: rentInv + deposit});
+    }
+  }
+
+  let be = null;
+  for(let k=1;k<series.length;k++){
+    if(series[k].buy >= series[k].rent){ be = series[k].y; break; }
+  }
+  return {P,dp,stamp,reg,other,appr,rInv,emi,upfront,loan,series,be,m1buy,m1rent,deposit,rate,tenure};
+}
+
+function waitPlan(M){
+  const income0=num('income'), save0=num('save'), corpus0=num('corpus'),
+        sg=num('salgrow')/100, cap=num('emicap')/100, rInv=M.rInv,
+        dp=M.dp, stamp=M.stamp, reg=M.reg, other=M.other, appr=M.appr,
+        rate=Math.max(0,num('rate'))/100, tenure=clamp(num('tenure'),1,40);
+  const i=rate/12, n=Math.round(tenure*12);
+  const rows=[]; let corpus=corpus0, first=null;
+
+  for(let t=0;t<=12;t++){
+    if(t>0){
+      for(let m=0;m<12;m++){ corpus = corpus*(1+rInv/12) + save0*Math.pow(1+sg,t-1); }
+    }
+    const price = M.P*Math.pow(1+appr,t);
+    const need = price*(dp+stamp+reg) + other*Math.pow(1+INFL,t);
+    const income = income0*Math.pow(1+sg,t);
+    const loan = price*(1-dp);
+    const emi = (i>0&&n>0)? loan*i*Math.pow(1+i,n)/(Math.pow(1+i,n)-1) : loan/Math.max(n,1);
+    const cashOK = corpus>=need, emiOK = emi<=income*cap;
+    if(cashOK && emiOK && first===null) first=t;
+    rows.push({t,price,need,corpus,emi,capAmt:income*cap,cashOK,emiOK});
+  }
+  return {rows, first, capPct:cap*100};
+}
+
+function chart(S, be){
+  const W=680,H=330,pl=62,pr=14,pt=16,pb=36;
+  const vals = S.flatMap(d=>[d.buy,d.rent]).filter(v=>isFinite(v));
+  if(!vals.length){ $('chart').innerHTML=''; return; }
+  let mx=Math.max(...vals), mn=Math.min(0,...vals);
+  const pad=(mx-mn)*0.08; mx+=pad; mn-=pad;
+  if(!(mx-mn > 0)){ mx = mn + 1; }
+  const yrs = Math.max(1, S[S.length-1].y);
+  const X = t => { const r = pl + (t/yrs)*(W-pl-pr); return isFinite(r)?r:pl; };
+  const Y = v => { const r = pt + (1-(v-mn)/(mx-mn))*(H-pt-pb); return isFinite(r)?r:(H-pb); };
+  let g='';
+  for(let k=0;k<=4;k++){
+    const v = mn+(mx-mn)*k/4, y=Y(v);
+    g+=`<line x1="${pl}" y1="${y}" x2="${W-pr}" y2="${y}" stroke="#C6CBC2" stroke-width="1" stroke-dasharray="${v===0?'':'2 4'}"/>`;
+    g+=`<text x="${pl-8}" y="${y+3.5}" text-anchor="end" font-family="ui-monospace,Menlo,monospace" font-size="10" fill="#6A7570">${compact(v)}</text>`;
+  }
+  for(let t=0;t<=yrs;t+=5){
+    g+=`<line x1="${X(t)}" y1="${pt}" x2="${X(t)}" y2="${H-pb}" stroke="#C6CBC2" stroke-width="1" opacity=".5"/>`;
+    g+=`<text x="${X(t)}" y="${H-pb+16}" text-anchor="middle" font-family="ui-monospace,Menlo,monospace" font-size="10" fill="#6A7570">yr ${t}</text>`;
+  }
+  const path = k => 'M ' + S.map(d=>`${X(d.y).toFixed(1)} ${Y(d[k]).toFixed(1)}`).join(' L ');
+  g+=`<path d="${path('rent')}" fill="none" stroke="#9B3B5E" stroke-width="2.4" stroke-linejoin="round"/>`;
+  g+=`<path d="${path('buy')}" fill="none" stroke="#1D5C4F" stroke-width="2.4" stroke-linejoin="round"/>`;
+  if(be!==null){
+    const d = S.find(s=>s.y===be);
+    g+=`<line x1="${X(be)}" y1="${pt}" x2="${X(be)}" y2="${H-pb}" stroke="#B07D22" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+    g+=`<circle cx="${X(be)}" cy="${Y(d.buy)}" r="5" fill="#B07D22" stroke="#F6F7F4" stroke-width="2"/>`;
+    const anchor = be>yrs*0.7?'end':'start', dx = be>yrs*0.7?-8:8;
+    g+=`<text x="${X(be)+dx}" y="${pt+13}" text-anchor="${anchor}" font-family="ui-monospace,Menlo,monospace" font-size="10.5" fill="#B07D22" letter-spacing=".08em">BREAK-EVEN</text>`;
+  }
+  $('chart').innerHTML = g;
+}
+
+function render(){
+  const M = model(), S = M.series, be = M.be, stay = num('stay');
+
+  const atStay = S.find(s=>s.y===Math.min(Math.max(1,Math.round(stay)),HORIZON)) || S[S.length-1];
+  const gap = atStay.buy - atStay.rent;
+  let h, p;
+  if(be===null){
+    h = 'Rent, and invest the gap.';
+    p = `Buying never catches up inside ${HORIZON} years with these assumptions. At year ${atStay.y} the renter is ahead by ${compact(-gap)}. Appreciation of ${(M.appr*100).toFixed(1)}% simply can't beat ${(M.rInv*100).toFixed(1)}% compounding on money you never sank into stamp duty.`;
+    $('seal-y').textContent='—'; $('seal-l').textContent='never';
+  } else if(stay >= be){
+    h = 'Buy — you\'ll stay long enough.';
+    p = `Ownership pulls ahead in year ${be}, and you plan to stay ${stay}. By then you're ahead by ${compact(gap)}. Everything before year ${be} is you paying off stamp duty, registration and interest.`;
+    $('seal-y').textContent=be; $('seal-l').textContent='year';
+  } else {
+    h = 'Rent for now.';
+    p = `Buying only breaks even in year ${be}, but you're planning on ${stay}. Sell at year ${stay} and you're ${compact(-gap)} behind the renter after brokerage and the upfront costs you never recovered.`;
+    $('seal-y').textContent=be; $('seal-l').textContent='year';
+  }
+  $('vh').textContent = h; $('vp').textContent = p;
+
+  chart(S, be);
+  $('chartnote').textContent = `Both lines start with the same cash. The renter's line starts higher because ${compact(M.upfront - M.P*M.dp)} of the buyer's money vanishes into stamp duty, registration and setup on day one.`;
+
+  $('s-buy').textContent = inr(M.m1buy);
+  $('s-rent').textContent = inr(M.m1rent);
+  $('s-emi').textContent = inr(M.emi);
+  $('s-up').textContent = compact(M.upfront);
+
+  const items = [
+    ['Down payment', M.P*M.dp],
+    ['Stamp duty', M.P*M.stamp],
+    ['Registration', M.P*M.reg],
+    ['Legal, GST, brokerage, interiors', M.other]
+  ];
+  const share = v => M.P > 0 ? (v/M.P*100).toFixed(1)+'%' : '—';
+  $('upfront-body').innerHTML = items.map(([k,v])=>
+    `<tr><td>${k}</td><td class="n">${inr(v)}</td><td class="n">${share(v)}</td></tr>`).join('')
+    + `<tr class="tot"><td>Cash before you get the keys</td><td class="n">${inr(M.upfront)}</td><td class="n">${share(M.upfront)}</td></tr>`
+    + `<tr><td>Sunk — never comes back on resale</td><td class="n">${inr(M.upfront - M.P*M.dp)}</td><td class="n">${share(M.upfront - M.P*M.dp)}</td></tr>`;
+
+  const W = waitPlan(M);
+  $('wait-body').innerHTML = W.rows.slice(0,9).map(r=>
+    `<tr>
+      <td>${r.t===0?'Now':r.t+' yr'}</td>
+      <td class="n">${compact(r.price)}</td>
+      <td class="n">${compact(r.need)}</td>
+      <td class="n ${r.cashOK?'ok':'no'}">${compact(r.corpus)}</td>
+      <td class="n ${r.emiOK?'ok':'no'}">${compact(r.emi)} / ${compact(r.capAmt)}</td>
+      <td class="n">${r.cashOK&&r.emiOK?'<span class="ok">✓</span>':'<span class="no">✕</span>'}</td>
+    </tr>`).join('');
+
+  let wv;
+  if(W.first===0){
+    const tail = be===null ? 'this property never breaks even, so waiting costs you nothing.'
+                           : 'do not buy unless you will hold it past year ' + be + '.';
+    wv = `You can afford it today — the corpus covers the upfront cash and the EMI sits inside ${W.capPct.toFixed(0)}% of take-home. So the wait question becomes the staying question: ${tail}`;
+  } else if(W.first!==null){
+    const r = W.rows[W.first];
+    wv = `Wait about ${W.first} ${W.first===1?'year':'years'}. By then the price is around ${compact(r.price)}, you'll need ${compact(r.need)} in hand, and you'll have roughly ${compact(r.corpus)}. The EMI of ${compact(r.emi)} fits your ${W.capPct.toFixed(0)}% ceiling.`;
+  } else {
+    const last = W.rows[W.rows.length-1];
+    wv = `Waiting isn't fixing this. After 12 years you'd still be short — property is compounding at ${(M.appr*100).toFixed(1)}% while your savings can't keep pace. Look at a cheaper property, a bigger monthly saving, or a longer tenure. Right now you'd need ${compact(last.need)} against a corpus of ${compact(last.corpus)}.`;
+  }
+  $('wait-verdict').innerHTML = wv;
+
+  const marks = [3,5,7,10,15,20,25].filter(y=>y<=HORIZON);
+  $('year-body').innerHTML = marks.map(y=>{
+    const d = S.find(s=>s.y===y); if(!d) return '';
+    const win = d.buy>=d.rent;
+    return `<tr><td>${y}</td><td class="n">${compact(d.val)}</td><td class="n">${compact(d.bal)}</td>
+      <td class="n" style="color:${win?'var(--buy)':'inherit'};font-weight:${win?600:400}">${compact(d.buy)}</td>
+      <td class="n" style="color:${!win?'var(--rent)':'inherit'};font-weight:${!win?600:400}">${compact(d.rent)}</td></tr>`;
+  }).join('');
+}
+
+document.querySelectorAll('input,select').forEach(el=>{
+  el.addEventListener('input', render);
+  el.addEventListener('change', render);
+});
+
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function goTo(el, focus){
+  if(!el) return;
+  el.scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block:'start'});
+  if(focus) setTimeout(()=>el.focus({preventScroll:true}), reduce?0:420);
+}
+$('calc').addEventListener('click', ()=>{
+  render();
+  const r = $('results');
+  goTo(r, true);
+  r.animate(
+    [{boxShadow:'0 0 0 0 rgba(176,125,34,.55)'},{boxShadow:'0 0 0 12px rgba(176,125,34,0)'}],
+    {duration: reduce?1:900, easing:'ease-out'}
+  );
+});
+$('back').addEventListener('click', ()=> goTo(document.querySelector('.col-in')));
+$('state').addEventListener('change', e=>{ if(e.target.value) $('stamp').value = e.target.value; render(); });
+render();
+</script>
+</body>
+</html>
