@@ -18,6 +18,7 @@
     --house:#1D5C4F;
     --house-soft:#E3F1F0;
     --gold:#B07D22;
+    --gold-soft:#F7EEDC;
     --radius:16px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -93,6 +94,7 @@
   }
   .tool-card.car-card{border-top:5px solid var(--car)}
   .tool-card.house-card{border-top:5px solid var(--house)}
+  .tool-card.emi-card{border-top:5px solid var(--gold);grid-column:1/-1}
 
   .card-icon{
     width:48px;height:48px;border-radius:12px;margin-bottom:18px;
@@ -102,6 +104,8 @@
   .house-card .card-icon{background:var(--house-soft)}
   .car-card .card-icon svg{color:var(--car)}
   .house-card .card-icon svg{color:var(--house)}
+  .emi-card .card-icon{background:var(--gold-soft)}
+  .emi-card .card-icon svg{color:var(--gold)}
 
   .card-tag{
     font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;
@@ -109,6 +113,7 @@
   }
   .car-card .card-tag{color:var(--car)}
   .house-card .card-tag{color:var(--house)}
+  .emi-card .card-tag{color:var(--gold)}
 
   .tool-card h2{
     font-family:'Sora',sans-serif;font-weight:800;font-size:22px;
@@ -135,6 +140,7 @@
   }
   .car-card .card-cta{color:var(--car)}
   .house-card .card-cta{color:var(--house)}
+  .emi-card .card-cta{color:var(--gold)}
   .tool-card:hover .card-cta{gap:12px}
   .card-cta svg{transition:transform .2s}
   .tool-card:hover .card-cta svg{transform:translateX(3px)}
@@ -205,6 +211,29 @@
       <span class="badge">Break-even year</span>
       <span class="badge">Net worth chart</span>
       <span class="badge">Wait planner</span>
+    </div>
+    <div class="card-cta">
+      Open calculator
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </div>
+  </a>
+
+  <!-- HOME LOAN EMI -->
+  <a href="house-emi.html" class="tool-card emi-card" aria-label="Home loan: EMI and prepayment planner">
+    <div class="card-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="2" width="16" height="20" rx="2"/>
+        <path d="M8 6h8M8 11h2M14 11h2M8 15h2M14 15h2M8 19h2M14 19h2"/>
+      </svg>
+    </div>
+    <div class="card-tag">Home loan · Prepayment planner</div>
+    <h2>Debt-free Sooner</h2>
+    <p>See exactly when your home loan ends — and how much earlier it could. Add a monthly extra or yearly lump sums, choose to shorten the tenure or lower the EMI, and watch the interest you save add up.</p>
+    <div class="card-meta">
+      <span class="badge">EMI calculator</span>
+      <span class="badge">Part-prepayment</span>
+      <span class="badge">Interest saved</span>
+      <span class="badge">Balance chart</span>
     </div>
     <div class="card-cta">
       Open calculator

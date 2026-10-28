@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home Loan Planner</title>
+<meta name="description" content="See how extra monthly payments and lump-sum prepayments change your home loan EMI, tenure and total interest.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F4F7; --surface:#FFFFFF; --ink:#16202F; --muted:#556072; --faint:#7D8798; --line:#DCE1E8; --field:#F7F9FA;
+  --accent:#0E7A5A; --accent-soft:rgba(14,122,90,.12);
+  --principal:#2A78D6; --interest:#EDA100; --plan:#1BAF7A; --plan-soft:rgba(27,175,122,.12); --lump:#6250D6; --base:#A3ABB8;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151E; --surface:#171E2A; --ink:#E6EAF0; --muted:#A0A9B8; --faint:#7A8496; --line:#2A3342; --field:#1C2431;
+    --accent:#3CC69A; --accent-soft:rgba(60,198,154,.16);
+    --principal:#3987E5; --interest:#C98500; --plan:#199E70; --plan-soft:rgba(25,158,112,.16); --lump:#9085E9; --base:#5F6879;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151E; --surface:#171E2A; --ink:#E6EAF0; --muted:#A0A9B8; --faint:#7A8496; --line:#2A3342; --field:#1C2431;
+  --accent:#3CC69A; --accent-soft:rgba(60,198,154,.16);
+  --principal:#3987E5; --interest:#C98500; --plan:#199E70; --plan-soft:rgba(25,158,112,.16); --lump:#9085E9; --base:#5F6879;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.5;font-variant-numeric:tabular-nums}
+.wrap{max-width:1120px;margin:0 auto;padding:32px 16px 56px}
+h1,h2,h3,p{margin:0}
+.brand{font-size:15px;font-weight:500;color:var(--muted);margin-bottom:18px}
+
+/* Hero: the debt-free date is the one bold element on the page */
+.hero{margin-bottom:28px}
+.hero h1{font-size:clamp(36px,7vw,64px);line-height:1.05;font-weight:600;letter-spacing:-0.025em;max-width:17ch}
+.hero .sub{margin-top:12px;font-size:clamp(16px,2.2vw,19px);color:var(--muted);max-width:60ch}
+.hero .sub strong{color:var(--ink);font-weight:600}
+.timeline{margin-top:22px;max-width:720px}
+.track{position:relative;height:14px;border-radius:7px;background:var(--line);overflow:hidden}
+.fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:7px;transition:width .35s ease}
+.tl-labels{display:flex;justify-content:space-between;gap:12px;margin-top:8px;font-size:13px;color:var(--muted)}
+.tl-labels b{color:var(--ink);font-weight:500}
+
+/* Layout */
+.layout{display:grid;grid-template-columns:1fr;gap:24px}
+@media (min-width:920px){
+  .layout{grid-template-columns:340px minmax(0,1fr);align-items:start;gap:32px}
+  .controls{position:sticky;top:16px}
+}
+.controls{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.group+.group{margin-top:22px;padding-top:20px;border-top:1px solid var(--line)}
+.group h2{font-size:17px;font-weight:600;margin-bottom:4px}
+.group .hint{font-size:13px;color:var(--muted);margin-bottom:4px}
+.field{margin-top:14px}
+.field-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+.field label{font-size:14px;color:var(--muted)}
+.num{display:flex;align-items:center;background:var(--field);border:1px solid var(--line);border-radius:8px;padding:0 8px;height:34px;min-width:0}
+.num span{font-size:13px;color:var(--faint);white-space:nowrap}
+.num input{width:92px;border:0;background:transparent;color:var(--ink);font:inherit;font-size:15px;font-weight:500;text-align:right;padding:0 4px;outline:none;font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+.num input::-webkit-outer-spin-button,.num input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.num:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+input[type=month]{border:1px solid var(--line);background:var(--field);color:var(--ink);border-radius:8px;height:34px;padding:0 8px;font:inherit;font-size:14px}
+input[type=range]{width:100%;accent-color:var(--accent);margin:0;height:22px}
+.seg{display:flex;background:var(--field);border:1px solid var(--line);border-radius:9px;padding:3px;gap:3px;margin-top:8px}
+.seg button{flex:1;border:0;background:transparent;color:var(--muted);font:inherit;font-size:14px;padding:7px 6px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,.14)}
+.seg-label{font-size:14px;color:var(--muted);margin-top:16px}
+.actions{display:flex;gap:8px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+.btn{flex:1;border:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;font-size:14px;padding:8px 10px;border-radius:8px;cursor:pointer}
+.btn:hover{background:var(--field)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Results */
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+@media (min-width:640px){.stats{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.stat{padding:16px 18px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);margin:0 -1px -1px 0}
+.stat .k{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.stat .v{font-size:clamp(19px,2.6vw,24px);font-weight:600;letter-spacing:-0.01em;margin-top:2px;white-space:nowrap}
+.stat .d{font-size:13px;color:var(--faint);margin-top:2px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block}
+.insight{margin-top:14px;font-size:15px;color:var(--muted);max-width:68ch}
+.insight:empty{display:none}
+.insight strong{color:var(--ink);font-weight:600}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 18px 14px;margin-top:20px}
+.panel h3{font-size:16px;font-weight:600}
+.panel .cap{font-size:13px;color:var(--muted);margin-top:2px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin:12px 0 10px;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.ln{width:16px;height:0;border-top:2px solid;display:inline-block}
+.chart{position:relative;width:100%}
+details.panel summary{cursor:pointer;font-size:16px;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.panel summary::-webkit-details-marker{display:none}
+details.panel summary::after{content:"Show";font-size:14px;font-weight:400;color:var(--accent)}
+details.panel[open] summary::after{content:"Hide"}
+.tablewrap{overflow-x:auto;margin-top:12px;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:620px}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-weight:500;color:var(--muted);font-size:13px}
+th:first-child,td:first-child{text-align:left}
+td small{display:block;color:var(--faint);font-size:12px}
+.foot{margin-top:28px;font-size:13px;color:var(--faint);max-width:72ch}
+@media (prefers-reduced-motion: reduce){.fill{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="brand">Home loan planner</p>
+
+  <section class="hero" aria-live="polite">
+    <h1 id="heroTitle">Debt-free by —</h1>
+    <p class="sub" id="heroSub"></p>
+    <div class="timeline" aria-hidden="true">
+      <div class="track"><div class="fill" id="tlFill"></div></div>
+      <div class="tl-labels"><span id="tlStart"></span><span id="tlEnd"></span></div>
+    </div>
+  </section>
+
+  <div class="layout">
+    <form class="controls" id="controls" onsubmit="return false" novalidate>
+      <div class="group">
+        <h2>Your loan</h2>
+        <div class="field">
+          <div class="field-top"><label for="amountN">Loan amount</label>
+            <div class="num"><span>₹</span><input id="amountN" type="number" inputmode="decimal" step="0.1" min="1"><span>lakh</span></div></div>
+          <input id="amountR" type="range" min="5" max="300" step="0.1" aria-label="Loan amount in lakh">
+        </div>
+        <div class="field">
+          <div class="field-top"><label for="rateN">Interest rate</label>
+            <div class="num"><input id="rateN" type="number" inputmode="decimal" step="0.05" min="0" max="30"><span>% a year</span></div></div>
+          <input id="rateR" type="range" min="5" max="15" step="0.05" aria-label="Interest rate">
+        </div>
+        <div class="field">
+          <div class="field-top"><label for="yearsN">Tenure</label>
+            <div class="num"><input id="yearsN" type="number" inputmode="numeric" step="1" min="1" max="40"><span>years</span></div></div>
+          <input id="yearsR" type="range" min="1" max="30" step="1" aria-label="Tenure in years">
+        </div>
+        <div class="field">
+          <div class="field-top"><label for="start">First EMI</label><input id="start" type="month"></div>
+        </div>
+      </div>
+
+      <div class="group">
+        <h2>Extra every month</h2>
+        <p class="hint">Paid along with your EMI. It goes straight to principal and shortens the loan.</p>
+        <div class="field">
+          <div class="field-top"><label for="extraN">Extra amount</label>
+            <div class="num"><span>₹</span><input id="extraN" type="number" inputmode="numeric" step="1000" min="0"><span>a month</span></div></div>
+          <input id="extraR" type="range" min="0" max="200000" step="1000" aria-label="Extra monthly payment">
+        </div>
+        <div class="field">
+          <div class="field-top"><label for="extraStartN">Start in year</label>
+            <div class="num"><input id="extraStartN" type="number" inputmode="numeric" step="1" min="1"></div></div>
+          <input id="extraStartR" type="range" min="1" max="15" step="1" aria-label="Year to start extra payments">
+        </div>
+      </div>
+
+      <div class="group">
+        <h2>Lump-sum prepayment</h2>
+        <p class="hint">A bonus or savings paid at the end of a loan year.</p>
+        <div class="field">
+          <div class="field-top"><label for="lumpN">Amount</label>
+            <div class="num"><span>₹</span><input id="lumpN" type="number" inputmode="decimal" step="0.5" min="0"><span>lakh</span></div></div>
+          <input id="lumpR" type="range" min="0" max="30" step="0.5" aria-label="Lump-sum amount in lakh">
+        </div>
+        <div class="seg" role="group" aria-label="How often">
+          <button type="button" data-lump="once" aria-pressed="true">Once</button>
+          <button type="button" data-lump="every" aria-pressed="false">Every year</button>
+        </div>
+        <div class="field">
+          <div class="field-top"><label for="lumpYearN" id="lumpYearLabel">At the end of year</label>
+            <div class="num"><input id="lumpYearN" type="number" inputmode="numeric" step="1" min="1"></div></div>
+          <input id="lumpYearR" type="range" min="1" max="14" step="1" aria-label="Loan year for lump sum">
+        </div>
+        <p class="seg-label">After a lump sum</p>
+        <div class="seg" role="group" aria-label="After a lump sum">
+          <button type="button" data-strat="tenure" aria-pressed="true">Shorten the loan</button>
+          <button type="button" data-strat="emi" aria-pressed="false">Lower my EMI</button>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn" id="copyBtn">Copy link</button>
+        <button type="button" class="btn" id="resetBtn">Reset</button>
+      </div>
+    </form>
+
+    <main>
+      <div class="stats" id="stats">
+        <div class="stat"><p class="k">Monthly payment</p><p class="v" id="sPay"></p><p class="d" id="sPayD"></p></div>
+        <div class="stat"><p class="k">Tenure</p><p class="v" id="sTen"></p><p class="d" id="sTenD"></p></div>
+        <div class="stat"><p class="k"><i class="dot"></i>Interest saved</p><p class="v" id="sSaved"></p><p class="d" id="sSavedD"></p></div>
+        <div class="stat"><p class="k">Total interest</p><p class="v" id="sInt"></p><p class="d" id="sIntD"></p></div>
+        <div class="stat"><p class="k">Total amount paid</p><p class="v" id="sTot"></p><p class="d" id="sTotD"></p></div>
+        <div class="stat"><p class="k">Extra paid in total</p><p class="v" id="sExtra"></p><p class="d">Monthly extras and lump sums</p></div>
+      </div>
+      <p class="insight" id="insight"></p>
+
+      <section class="panel">
+        <h3>Outstanding balance</h3>
+        <p class="cap">What you still owe at the end of each loan year, in ₹ lakh</p>
+        <div class="legend">
+          <span><i class="ln" style="border-color:var(--base);border-top-style:dashed"></i>Original schedule</span>
+          <span><i class="ln" style="border-color:var(--plan)"></i>Your plan</span>
+        </div>
+        <div class="chart" style="height:260px"><canvas id="balChart" role="img" aria-label="Outstanding balance by year for the original schedule and your plan"></canvas></div>
+      </section>
+
+      <section class="panel">
+        <h3>Where your money goes</h3>
+        <p class="cap">Principal and interest paid over the whole loan, in ₹ lakh</p>
+        <div class="legend">
+          <span><i class="sw" style="background:var(--principal)"></i>Principal</span>
+          <span><i class="sw" style="background:var(--interest)"></i>Interest</span>
+        </div>
+        <div class="chart" id="mixWrap" style="height:118px"><canvas id="mixChart" role="img" aria-label="Principal versus interest for each plan"></canvas></div>
+      </section>
+
+      <section class="panel">
+        <h3>What you pay each year</h3>
+        <p class="cap">EMIs, extra monthly payments and lump sums, in ₹ lakh</p>
+        <div class="legend">
+          <span><i class="sw" style="background:var(--principal)"></i>EMIs</span>
+          <span><i class="sw" style="background:var(--plan)"></i>Extra monthly</span>
+          <span><i class="sw" style="background:var(--lump)"></i>Lump sum</span>
+        </div>
+        <div class="chart" style="height:240px"><canvas id="yearChart" role="img" aria-label="Amount paid in each loan year"></canvas></div>
+      </section>
+
+      <details class="panel">
+        <summary>Year-by-year schedule</summary>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Year</th><th>EMIs paid</th><th>Extra paid</th><th>Interest</th><th>Principal repaid</th><th>Balance left</th></tr></thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </details>
+
+      <p class="foot">Estimates assume a fixed interest rate for the whole loan, interest charged monthly on the reducing balance, extra monthly payments made with each EMI, and lump sums paid at the end of the chosen loan year. Your lender's figures may differ slightly. Check your loan agreement for any prepayment terms.</p>
+    </main>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// CALC-START
+function emiFor(balance, r, n){
+  if (n <= 0) return balance;
+  if (r === 0) return balance / n;
+  const f = Math.pow(1 + r, n);
+  return balance * r * f / (f - 1);
+}
+function simulate(o){
+  const P = o.principal, r = o.rate / 1200, N = Math.round(o.years * 12);
+  const E0 = emiFor(P, r, N);
+  let b = P, e = E0, m = 0, interest = 0, extraTot = 0, lumpTot = 0;
+  let firstCutEmi = null, lastCutYear = null;
+  const years = [];
+  let row = null;
+  const extraFrom = (o.extraStartYear - 1) * 12 + 1;
+  while (b > 0.005 && m < N){
+    m++;
+    if ((m - 1) % 12 === 0){
+      row = { year: years.length + 1, emi: 0, extra: 0, lump: 0, interest: 0, principal: 0, closing: 0 };
+      years.push(row);
+    }
+    const i = b * r;
+    const pay = Math.min(e, b + i);
+    b = b + i - pay;
+    interest += i;
+    row.interest += i; row.emi += pay; row.principal += pay - i;
+    if (o.extra > 0 && m >= extraFrom && b > 0.005){
+      const x = Math.min(o.extra, b);
+      b -= x; extraTot += x; row.extra += x; row.principal += x;
+    }
+    if (o.lump > 0 && m % 12 === 0 && m < N && b > 0.005){
+      const y = m / 12;
+      if (o.lumpEvery ? y >= o.lumpYear : y === o.lumpYear){
+        const x = Math.min(o.lump, b);
+        b -= x; lumpTot += x; row.lump += x; row.principal += x;
+        if (o.cutEmi && b > 0.005){
+          e = emiFor(b, r, N - m);
+          if (firstCutEmi === null) firstCutEmi = e;
+          lastCutYear = y;
+        }
+      }
+    }
+    if (b < 0.005) b = 0;
+    row.closing = b;
+  }
+  return { E0, N, months: m, interest, totalPaid: P + interest, extraTot, lumpTot,
+           years, finalEmi: e, firstCutEmi, lastCutYear };
+}
+// CALC-END
+
+(function(){
+const $ = id => document.getElementById(id);
+function nextMonth(){ const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() + 1); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
+const DEFAULTS = { amount: 97.2, rate: 7.5, years: 15, start: nextMonth(), extra: 50000, extraStart: 1, lump: 0, lumpYear: 1, lumpMode: 'once', strat: 'tenure' };
+let lumpMode = DEFAULTS.lumpMode, strat = DEFAULTS.strat;
+
+const inr = v => '₹' + Math.round(v).toLocaleString('en-IN');
+function short(v){
+  const a = Math.abs(v);
+  if (a >= 1e7) return '₹' + (v / 1e7).toFixed(2) + ' Cr';
+  if (a >= 1e5) return '₹' + (v / 1e5).toFixed(2) + ' L';
+  return inr(v);
+}
+function dur(m){
+  const y = Math.floor(m / 12), mo = m % 12, p = [];
+  if (y) p.push(y + (y === 1 ? ' year' : ' years'));
+  if (mo) p.push(mo + (mo === 1 ? ' month' : ' months'));
+  return p.join(' ') || '0 months';
+}
+function durShort(m){ const y = Math.floor(m / 12), mo = m % 12; return ((y ? y + ' yrs' : '') + (mo ? (y ? ' ' : '') + mo + ' mo' : '')) || '0 mo'; }
+function monthName(start, offset){
+  const [Y, M] = (start || DEFAULTS.start).split('-').map(Number);
+  const d = new Date(Y, M - 1 + offset, 1);
+  return d.toLocaleString('en-IN', { month: 'short', year: 'numeric' });
+}
+
+// Paired number + range inputs
+const pairs = ['amount', 'rate', 'years', 'extra', 'extraStart', 'lump', 'lumpYear'];
+function setVal(k, v){ $(k + 'N').value = v; $(k + 'R').value = v; }
+function getVal(k){
+  const el = $(k + 'N'); let v = parseFloat(el.value);
+  if (!isFinite(v)) v = parseFloat($(k + 'R').value);
+  const min = parseFloat(el.min); if (isFinite(min) && v < min) v = min;
+  const max = parseFloat(el.max); if (isFinite(max) && v > max) v = max;
+  return v;
+}
+pairs.forEach(k => {
+  $(k + 'R').addEventListener('input', e => { $(k + 'N').value = e.target.value; render(); });
+  $(k + 'N').addEventListener('input', e => { if (e.target.value !== '') $(k + 'R').value = e.target.value; render(); });
+  $(k + 'N').addEventListener('blur', () => { $(k + 'N').value = getVal(k); });
+});
+$('start').addEventListener('input', render);
+
+function setSeg(attr, val){
+  document.querySelectorAll('[data-' + attr + ']').forEach(b => b.setAttribute('aria-pressed', String(b.dataset[attr] === val)));
+}
+document.querySelectorAll('[data-lump]').forEach(b => b.addEventListener('click', () => { lumpMode = b.dataset.lump; setSeg('lump', lumpMode); render(); }));
+document.querySelectorAll('[data-strat]').forEach(b => b.addEventListener('click', () => { strat = b.dataset.strat; setSeg('strat', strat); render(); }));
+
+function applyState(s){
+  setVal('amount', s.amount); setVal('rate', s.rate); setVal('years', s.years);
+  setVal('extra', s.extra); setVal('extraStart', s.extraStart); setVal('lump', s.lump); setVal('lumpYear', s.lumpYear);
+  $('start').value = s.start; lumpMode = s.lumpMode; strat = s.strat;
+  setSeg('lump', lumpMode); setSeg('strat', strat);
+}
+function stateFromURL(){
+  const s = Object.assign({}, DEFAULTS);
+  try {
+    const q = new URLSearchParams(location.search);
+    ['amount', 'rate', 'years', 'extra', 'extraStart', 'lump', 'lumpYear'].forEach(k => {
+      if (q.has(k) && isFinite(parseFloat(q.get(k)))) s[k] = parseFloat(q.get(k));
+    });
+    if (/^\d{4}-\d{2}$/.test(q.get('start') || '')) s.start = q.get('start');
+    if (q.get('lumpMode') === 'every') s.lumpMode = 'every';
+    if (q.get('after') === 'emi') s.strat = 'emi';
+  } catch (e) {}
+  return s;
+}
+function writeURL(){
+  try {
+    const q = new URLSearchParams({ amount: getVal('amount'), rate: getVal('rate'), years: getVal('years'), start: $('start').value,
+      extra: getVal('extra'), extraStart: getVal('extraStart'), lump: getVal('lump'), lumpYear: getVal('lumpYear'), lumpMode, after: strat });
+    history.replaceState(null, '', location.pathname + '?' + q.toString());
+  } catch (e) {}
+}
+$('resetBtn').addEventListener('click', () => { applyState(Object.assign({}, DEFAULTS, { start: nextMonth() })); render(); });
+$('copyBtn').addEventListener('click', async () => {
+  const btn = $('copyBtn');
+  try { await navigator.clipboard.writeText(location.href); btn.textContent = 'Link copied'; }
+  catch (e) { btn.textContent = 'Copy it from the address bar'; }
+  setTimeout(() => { btn.textContent = 'Copy link'; }, 2000);
+});
+
+// Charts
+const FONT = '"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif';
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+let balChart, mixChart, yearChart;
+function axisTicks(){ return { color: css('--faint'), font: { family: FONT, size: 11 } }; }
+function baseOpts(){
+  return {
+    responsive: true, maintainAspectRatio: false, animation: reduced ? false : { duration: 250 },
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: axisTicks(), border: { color: css('--line') } },
+      y: { min: 0, grid: { color: css('--line') }, ticks: axisTicks(), border: { display: false } }
+    }
+  };
+}
+// Round only the outer end of the top-most non-empty segment in a stack
+function topRadius(ctx, horizontal){
+  const ds = ctx.chart.data.datasets, i = ctx.dataIndex;
+  for (let d = ds.length - 1; d >= 0; d--){
+    if ((ds[d].data[i] || 0) > 0) return d === ctx.datasetIndex ? (horizontal ? { topRight: 4, bottomRight: 4 } : { topLeft: 4, topRight: 4 }) : 0;
+  }
+  return 0;
+}
+function initCharts(){
+  if (typeof Chart === 'undefined') return;
+  Chart.defaults.font.family = FONT;
+  const surface = css('--surface');
+
+  const o1 = baseOpts();
+  o1.interaction = { mode: 'index', intersect: false };
+  o1.plugins.tooltip = { callbacks: { title: t => 'End of year ' + t[0].label, label: c => (c.datasetIndex ? ' Your plan: ' : ' Original: ') + short((c.raw ?? 0) * 1e5) } };
+  o1.scales.y.ticks.callback = v => v + ' L';
+  balChart = new Chart($('balChart'), { type: 'line', data: { labels: [], datasets: [
+    { data: [], borderColor: css('--base'), borderDash: [5, 4], borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, tension: 0.25 },
+    { data: [], borderColor: css('--plan'), backgroundColor: css('--plan-soft'), fill: true, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, tension: 0.25 }
+  ] }, options: o1 });
+
+  const o2 = baseOpts();
+  o2.indexAxis = 'y';
+  o2.scales.x = { stacked: true, min: 0, grid: { color: css('--line') }, ticks: Object.assign(axisTicks(), { callback: v => v + ' L' }), border: { display: false } };
+  o2.scales.y = { stacked: true, grid: { display: false }, ticks: { color: css('--muted'), font: { family: FONT, size: 13 } }, border: { color: css('--line') } };
+  o2.plugins.tooltip = { callbacks: { label: c => ' ' + c.dataset.label + ': ' + short(c.raw * 1e5) } };
+  const seg2 = { borderColor: surface, borderWidth: { right: 2 }, borderSkipped: false, barThickness: 22, borderRadius: ctx => topRadius(ctx, true) };
+  mixChart = new Chart($('mixChart'), { type: 'bar', data: { labels: [], datasets: [
+    Object.assign({ label: 'Principal', data: [], backgroundColor: css('--principal') }, seg2),
+    Object.assign({ label: 'Interest', data: [], backgroundColor: css('--interest') }, seg2)
+  ] }, options: o2 });
+
+  const o3 = baseOpts();
+  o3.scales.x.stacked = true; o3.scales.y.stacked = true;
+  o3.scales.y.ticks.callback = v => v + ' L';
+  o3.interaction = { mode: 'index', intersect: false };
+  o3.plugins.tooltip = { filter: i => i.raw > 0, callbacks: { title: t => 'Year ' + t[0].label, label: c => ' ' + c.dataset.label + ': ' + short(c.raw * 1e5) } };
+  const seg3 = { borderColor: surface, borderWidth: { top: 2 }, borderSkipped: false, maxBarThickness: 28, borderRadius: ctx => topRadius(ctx, false) };
+  yearChart = new Chart($('yearChart'), { type: 'bar', data: { labels: [], datasets: [
+    Object.assign({ label: 'EMIs', data: [], backgroundColor: css('--principal') }, seg3),
+    Object.assign({ label: 'Extra monthly', data: [], backgroundColor: css('--plan') }, seg3),
+    Object.assign({ label: 'Lump sum', data: [], backgroundColor: css('--lump') }, seg3)
+  ] }, options: o3 });
+}
+
+function render(){
+  const yearsMax = Math.max(1, Math.round(getVal('years')));
+  $('extraStartR').max = yearsMax; $('extraStartN').max = yearsMax;
+  $('lumpYearR').max = Math.max(1, yearsMax - 1); $('lumpYearN').max = Math.max(1, yearsMax - 1);
+  $('lumpYearLabel').textContent = lumpMode === 'every' ? 'Every year from year' : 'At the end of year';
+
+  const start = $('start').value || DEFAULTS.start;
+  const o = {
+    principal: getVal('amount') * 1e5, rate: getVal('rate'), years: yearsMax,
+    extra: getVal('extra'), extraStartYear: Math.min(Math.round(getVal('extraStart')), yearsMax),
+    lump: getVal('lump') * 1e5, lumpYear: Math.min(Math.round(getVal('lumpYear')), Math.max(1, yearsMax - 1)),
+    lumpEvery: lumpMode === 'every', cutEmi: strat === 'emi'
+  };
+  const base = simulate(Object.assign({}, o, { extra: 0, lump: 0 }));
+  const plan = simulate(o);
+  const hasExtra = o.extra > 0 && plan.extraTot > 0, hasLump = o.lump > 0 && plan.lumpTot > 0;
+  const saved = Math.max(0, base.interest - plan.interest);
+  const sooner = base.months - plan.months;
+  const origEnd = monthName(start, base.months - 1), planEnd = monthName(start, plan.months - 1);
+
+  // Hero
+  if (sooner > 0){
+    $('heroTitle').textContent = 'Debt-free by ' + planEnd;
+    $('heroSub').innerHTML = '<strong>' + dur(sooner) + ' sooner</strong> than the original ' + origEnd + ', with <strong>' + short(saved) + '</strong> less interest.';
+  } else if (hasLump && o.cutEmi && plan.firstCutEmi !== null){
+    $('heroTitle').textContent = 'EMI drops to ' + inr(plan.firstCutEmi);
+    $('heroSub').innerHTML = 'The loan still ends in ' + origEnd + ', with <strong>' + short(saved) + '</strong> less interest.';
+  } else {
+    $('heroTitle').textContent = 'Debt-free by ' + origEnd;
+    $('heroSub').textContent = 'Add an extra monthly payment or a lump sum to see how much sooner you could finish.';
+  }
+  $('tlFill').style.width = (plan.months / base.months * 100).toFixed(2) + '%';
+  $('tlStart').innerHTML = 'Starts <b>' + monthName(start, 0) + '</b>';
+  $('tlEnd').innerHTML = sooner > 0 ? 'Ends <b>' + planEnd + '</b>, was ' + origEnd : 'Ends <b>' + origEnd + '</b>';
+
+  // Stats
+  $('sPay').textContent = inr(plan.E0 + (hasExtra ? o.extra : 0));
+  $('sPayD').textContent = hasExtra
+    ? inr(plan.E0) + ' EMI + ' + inr(o.extra) + ' extra' + (o.extraStartYear > 1 ? ' from year ' + o.extraStartYear : '')
+    : 'EMI only';
+  if (hasLump && o.cutEmi && plan.firstCutEmi !== null){
+    $('sPayD').textContent += o.lumpEvery && plan.lastCutYear > o.lumpYear
+      ? '. EMI falls to ' + inr(plan.finalEmi) + ' by year ' + plan.lastCutYear
+      : '. EMI becomes ' + inr(plan.firstCutEmi) + ' after year ' + o.lumpYear;
+  }
+  $('sTen').textContent = durShort(plan.months);
+  $('sTenD').textContent = sooner > 0 ? durShort(sooner) + ' shorter' : 'Same as original';
+  $('sSaved').textContent = short(saved);
+  $('sSavedD').textContent = base.interest > 0 ? Math.round(saved / base.interest * 100) + '% less interest' : '';
+  $('sInt').textContent = short(plan.interest);
+  $('sIntD').textContent = 'Original: ' + short(base.interest);
+  $('sTot').textContent = short(plan.totalPaid);
+  $('sTotD').textContent = 'Original: ' + short(base.totalPaid);
+  $('sExtra').textContent = short(plan.extraTot + plan.lumpTot);
+
+  // Insight
+  let msg = '';
+  if (hasExtra && hasLump){
+    const onlyExtra = simulate(Object.assign({}, o, { lump: 0 }));
+    const onlyLump = simulate(Object.assign({}, o, { extra: 0 }));
+    msg = 'On their own, the extra monthly payments would save <strong>' + short(base.interest - onlyExtra.interest) + '</strong> and the lump sums <strong>' + short(base.interest - onlyLump.interest) + '</strong>. Together they save ' + short(saved) + '.';
+  }
+  let alt = null;
+  if (hasLump){
+    alt = simulate(Object.assign({}, o, { cutEmi: !o.cutEmi }));
+    const altSaved = Math.max(0, base.interest - alt.interest);
+    msg += (msg ? ' ' : '') + (o.cutEmi
+      ? 'If your lump sums shortened the loan instead of lowering the EMI, you would save <strong>' + short(altSaved) + '</strong> and finish by ' + monthName(start, alt.months - 1) + '.'
+      : 'If your lump sums lowered the EMI instead, you would save <strong>' + short(altSaved) + '</strong>.');
+  }
+  $('insight').innerHTML = msg;
+
+  // Charts
+  if (balChart){
+    const n = base.years.length;
+    balChart.data.labels = Array.from({ length: n + 1 }, (_, i) => i);
+    balChart.data.datasets[0].data = [o.principal].concat(base.years.map(y => y.closing)).map(v => v / 1e5);
+    const pb = [o.principal].concat(plan.years.map(y => y.closing)).map(v => v / 1e5);
+    while (pb.length < n + 1) pb.push(null);
+    balChart.data.datasets[1].data = pb;
+    balChart.update();
+
+    const labels = ['Original', 'Your plan'], pr = [o.principal / 1e5, o.principal / 1e5], it = [base.interest / 1e5, plan.interest / 1e5];
+    if (alt){ labels.push(o.cutEmi ? 'Shorten instead' : 'Lower EMI instead'); pr.push(o.principal / 1e5); it.push(alt.interest / 1e5); }
+    mixChart.data.labels = labels; mixChart.data.datasets[0].data = pr; mixChart.data.datasets[1].data = it;
+    $('mixWrap').style.height = (labels.length * 38 + 42) + 'px';
+    mixChart.update();
+
+    yearChart.data.labels = plan.years.map(y => y.year);
+    yearChart.data.datasets[0].data = plan.years.map(y => y.emi / 1e5);
+    yearChart.data.datasets[1].data = plan.years.map(y => y.extra / 1e5);
+    yearChart.data.datasets[2].data = plan.years.map(y => y.lump / 1e5);
+    yearChart.update();
+  }
+
+  // Table
+  $('tbody').innerHTML = plan.years.map(y => {
+    const endOffset = Math.min(y.year * 12, plan.months) - 1;
+    return '<tr><td>' + y.year + '<small>to ' + monthName(start, endOffset) + '</small></td><td>' + inr(y.emi) + '</td><td>' + (y.extra + y.lump > 0 ? inr(y.extra + y.lump) : '–') +
+      '</td><td>' + inr(y.interest) + '</td><td>' + inr(y.principal) + '</td><td>' + inr(y.closing) + '</td></tr>';
+  }).join('');
+
+  writeURL();
+}
+
+function recolor(){
+  if (!balChart) return;
+  [balChart, mixChart, yearChart].forEach(c => c.destroy());
+  initCharts(); render();
+}
+try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', recolor); } catch (e) {}
+
+applyState(stateFromURL());
+initCharts();
+render();
+})();
+</script>
+</body>
+</html>
+
